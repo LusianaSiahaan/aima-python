@@ -22,7 +22,7 @@ def sequence(iterable):
 
 
 def removeall(item, seq):
-    """Return a copy of seq (or string) with all occurences of item removed."""
+    """Return a copy of seq (or string) with all occurrences of item removed."""
     if isinstance(seq, str):
         return seq.replace(item, '')
     else:
@@ -135,7 +135,7 @@ def element_wise_product(X, Y):
 
 
 def matrix_multiplication(X_M, *Y_M):
-    """Return a matrix as a matrix-multiplication of X_M and arbitary number of matrices *Y_M"""
+    """Return a matrix as a matrix-multiplication of X_M and arbitrary number of matrices *Y_M"""
 
     def _mat_mult(X_M, Y_M):
         """Return a matrix as a matrix-multiplication of two matrices X_M and Y_M
@@ -348,6 +348,17 @@ def vector_clip(vector, lowest, highest):
 # ______________________________________________________________________________
 # Misc Functions
 
+class injection():
+    """Dependency injection of temporary values for global functions/classes/etc.
+    E.g., `with injection(DataBase=MockDataBase): ...`"""
+    def __init__(self, **kwds): 
+        self.new = kwds
+    def __enter__(self): 
+        self.old = {v: globals()[v] for v in self.new}
+        globals().update(self.new)
+    def __exit__(self, type, value, traceback): 
+        globals().update(self.old)
+
 
 def memoize(fn, slot=None, maxsize=32):
     """Memoize fn: make it remember the computed value for any argument list.
@@ -418,7 +429,7 @@ def open_data(name, mode='r'):
 
 def failure_test(algorithm, tests):
     """Grades the given algorithm based on how many tests it passes.
-    Most algorithms have arbitary output on correct execution, which is difficult
+    Most algorithms have arbitrary output on correct execution, which is difficult
     to check for correctness. On the other hand, a lot of algorithms output something
     particular on fail (for example, False, or None).
     tests is a list with each element in the form: (values, failure_output)."""

@@ -214,7 +214,7 @@ E_NP_ = Grammar('E_NP_',  # Another Trivial Grammar for testing
 
 E_Prob = ProbGrammar('E_Prob', # The Probabilistic Grammar from the notebook
                      ProbRules(
-                         S="NP VP [0.6] | S Conjuction S [0.4]",
+                         S="NP VP [0.6] | S Conjunction S [0.4]",
                          NP="Pronoun [0.2] | Name [0.05] | Noun [0.2] | Article Noun [0.15] \
                              | Article Adjs Noun [0.1] | Digit [0.05] | NP PP [0.15] | NP RelClause [0.1]",
                          VP="Verb [0.3] | VP NP [0.2] | VP Adjective [0.25] | VP PP [0.15] | VP Adverb [0.1]",
@@ -232,24 +232,24 @@ E_Prob = ProbGrammar('E_Prob', # The Probabilistic Grammar from the notebook
                          Name="john [0.4] | mary [0.4] | peter [0.2]",
                          Article="the [0.5] | a [0.25] | an [0.25]",
                          Preposition="to [0.4] | in [0.3] | at [0.3]",
-                         Conjuction="and [0.5] | or [0.2] | but [0.3]",
+                         Conjunction="and [0.5] | or [0.2] | but [0.3]",
                          Digit="0 [0.35] | 1 [0.35] | 2 [0.3]"
                      ))
 
 
 
 E_Chomsky = Grammar('E_Prob_Chomsky', # A Grammar in Chomsky Normal Form
-        Rules(
-           S='NP VP',
-           NP='Article Noun | Adjective Noun',
-           VP='Verb NP | Verb Adjective',
-        ),
-        Lexicon(
-           Article='the | a | an',
-           Noun='robot | sheep | fence',
-           Adjective='good | new | sad',
-           Verb='is | say | are'
-        ))
+                    Rules(
+                       S='NP VP',
+                       NP='Article Noun | Adjective Noun',
+                       VP='Verb NP | Verb Adjective',
+                    ),
+                    Lexicon(
+                       Article='the | a | an',
+                       Noun='robot | sheep | fence',
+                       Adjective='good | new | sad',
+                       Verb='is | say | are'
+                    ))
 
 E_Prob_Chomsky = ProbGrammar('E_Prob_Chomsky', # A Probabilistic Grammar in CNF
                              ProbRules(
@@ -263,7 +263,18 @@ E_Prob_Chomsky = ProbGrammar('E_Prob_Chomsky', # A Probabilistic Grammar in CNF
                                 Adjective='good [0.5] | new [0.2] | sad [0.3]',
                                 Verb='is [0.5] | say [0.3] | are [0.2]'
                              ))
-
+E_Prob_Chomsky_ = ProbGrammar('E_Prob_Chomsky_',
+                             ProbRules(
+                                S='NP VP [1]',
+                                NP='NP PP [0.4] | Noun Verb [0.6]',
+                                PP='Preposition NP [1]',
+                                VP='Verb NP [0.7] | VP PP [0.3]',
+                                ),
+                             ProbLexicon(
+                                Noun='astronomers [0.18] | eyes [0.32] | stars [0.32] | telescopes [0.18]',
+                                Verb='saw [0.5] | \'\' [0.5]',
+                                Preposition='with [1]'
+                                ))
 
 # ______________________________________________________________________________
 # Chart Parsing
@@ -272,7 +283,7 @@ E_Prob_Chomsky = ProbGrammar('E_Prob_Chomsky', # A Probabilistic Grammar in CNF
 class Chart:
 
     """Class for parsing sentences using a chart data structure.
-    >>> chart = Chart(E0);
+    >>> chart = Chart(E0)
     >>> len(chart.parses('the stench is in 2 2'))
     1
     """
