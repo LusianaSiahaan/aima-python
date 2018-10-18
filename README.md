@@ -22,7 +22,7 @@ When complete, this project will have Python implementations for all the pseudoc
 ## Python 3.4 and up
 
 This code requires Python 3.4 or later, and does not run in Python 2. You can [install Python](https://www.python.org/downloads) or use a browser-based Python interpreter such as [repl.it](https://repl.it/languages/python3).
-You can run the code in an IDE, or from the command line with `python -i filename.py` where the `-i` option puts you in an interactive loop where you can run Python functions. See [jupyter.org](http://jupyter.org/) for instructions on setting up your own Jupyter notebook environment, or run the notebooks online with [try.jupiter.org](https://try.jupyter.org/).
+You can run the code in an IDE, or from the command line with `python -i filename.py` where the `-i` option puts you in an interactive loop where you can run Python functions. All notebooks are available in a [binder environment](http://mybinder.org/repo/aimacode/aima-python). Alternatively, visit [jupyter.org](http://jupyter.org/) for instructions on setting up your own Jupyter notebook environment.
 
 
 ## Installation Guide
@@ -64,36 +64,36 @@ Here is a table of algorithms, the figure, name of the algorithm in the book and
 | 2.7    | Table-Driven-Agent                | `TableDrivenAgent`            | [`agents.py`][agents]           | Done | Included |
 | 2.8    | Reflex-Vacuum-Agent               | `ReflexVacuumAgent`           | [`agents.py`][agents]           | Done | Included |
 | 2.10   | Simple-Reflex-Agent               | `SimpleReflexAgent`           | [`agents.py`][agents]           | Done | Included |
-| 2.12   | Model-Based-Reflex-Agent          | `ReflexAgentWithState`        | [`agents.py`][agents]           |      | Included |
+| 2.12   | Model-Based-Reflex-Agent          | `ReflexAgentWithState`        | [`agents.py`][agents]           | Done | Included |
 | 3      | Problem                           | `Problem`                     | [`search.py`][search]           | Done | Included |
 | 3      | Node                              | `Node`                        | [`search.py`][search]           | Done | Included |
 | 3      | Queue                             | `Queue`                       | [`utils.py`][utils]             | Done | No Need  |
 | 3.1    | Simple-Problem-Solving-Agent      | `SimpleProblemSolvingAgent`   | [`search.py`][search]           | Done | Included |
 | 3.2    | Romania                           | `romania`                     | [`search.py`][search]           | Done | Included |
-| 3.7    | Tree-Search                       | `tree_search`                 | [`search.py`][search]           | Done |          |
-| 3.7    | Graph-Search                      | `graph_search`                | [`search.py`][search]           | Done |          |
-| 3.11   | Breadth-First-Search              | `breadth_first_search`        | [`search.py`][search]           | Done | Included |
+| 3.7    | Tree-Search                       | `depth/breadth_first_tree_search`                 | [`search.py`][search]           | Done | Included |
+| 3.7    | Graph-Search                      | `depth/breadth_first_graph_search`                | [`search.py`][search]           | Done | Included |
+| 3.11   | Breadth-First-Search              | `breadth_first_graph_search`  | [`search.py`][search]           | Done | Included |
 | 3.14   | Uniform-Cost-Search               | `uniform_cost_search`         | [`search.py`][search]           | Done | Included |
-| 3.17   | Depth-Limited-Search              | `depth_limited_search`        | [`search.py`][search]           | Done |          |
-| 3.18   | Iterative-Deepening-Search        | `iterative_deepening_search`  | [`search.py`][search]           | Done |          |
+| 3.17   | Depth-Limited-Search              | `depth_limited_search`        | [`search.py`][search]           | Done | Included |
+| 3.18   | Iterative-Deepening-Search        | `iterative_deepening_search`  | [`search.py`][search]           | Done | Included |
 | 3.22   | Best-First-Search                 | `best_first_graph_search`     | [`search.py`][search]           | Done | Included |
 | 3.24   | A\*-Search                        | `astar_search`                | [`search.py`][search]           | Done | Included |
-| 3.26   | Recursive-Best-First-Search       | `recursive_best_first_search` | [`search.py`][search]           | Done |          |
+| 3.26   | Recursive-Best-First-Search       | `recursive_best_first_search` | [`search.py`][search]           | Done | Included |
 | 4.2    | Hill-Climbing                     | `hill_climbing`               | [`search.py`][search]           | Done | Included |
 | 4.5    | Simulated-Annealing               | `simulated_annealing`         | [`search.py`][search]           | Done | Included |
 | 4.8    | Genetic-Algorithm                 | `genetic_algorithm`           | [`search.py`][search]           | Done | Included |
-| 4.11   | And-Or-Graph-Search               | `and_or_graph_search`         | [`search.py`][search]           | Done |          |
-| 4.21   | Online-DFS-Agent                  | `online_dfs_agent`            | [`search.py`][search]           |      |          |
-| 4.24   | LRTA\*-Agent                      | `LRTAStarAgent`               | [`search.py`][search]           | Done |          |
+| 4.11   | And-Or-Graph-Search               | `and_or_graph_search`         | [`search.py`][search]           | Done | Included |
+| 4.21   | Online-DFS-Agent                  | `online_dfs_agent`            | [`search.py`][search]           | Done | Included |
+| 4.24   | LRTA\*-Agent                      | `LRTAStarAgent`               | [`search.py`][search]           | Done | Included |
 | 5.3    | Minimax-Decision                  | `minimax_decision`            | [`games.py`][games]             | Done | Included |
 | 5.7    | Alpha-Beta-Search                 | `alphabeta_search`            | [`games.py`][games]             | Done | Included |
 | 6      | CSP                               | `CSP`                         | [`csp.py`][csp]                 | Done | Included |
-| 6.3    | AC-3                              | `AC3`                         | [`csp.py`][csp]                 | Done |          |
+| 6.3    | AC-3                              | `AC3`                         | [`csp.py`][csp]                 | Done | Included |
 | 6.5    | Backtracking-Search               | `backtracking_search`         | [`csp.py`][csp]                 | Done | Included |
 | 6.8    | Min-Conflicts                     | `min_conflicts`               | [`csp.py`][csp]                 | Done | Included |
 | 6.11   | Tree-CSP-Solver                   | `tree_csp_solver`             | [`csp.py`][csp]                 | Done | Included |
 | 7      | KB                                | `KB`                          | [`logic.py`][logic]             | Done | Included |
-| 7.1    | KB-Agent                          | `KB_AgentProgram`             | [`logic.py`][logic]             | Done |          |
+| 7.1    | KB-Agent                          | `KB_AgentProgram`             | [`logic.py`][logic]             | Done | Included |
 | 7.7    | Propositional Logic Sentence      | `Expr`                        | [`utils.py`][utils]             | Done | Included |
 | 7.10   | TT-Entails                        | `tt_entails`                  | [`logic.py`][logic]             | Done | Included |
 | 7.12   | PL-Resolution                     | `pl_resolution`               | [`logic.py`][logic]             | Done | Included |
@@ -102,53 +102,52 @@ Here is a table of algorithms, the figure, name of the algorithm in the book and
 | 7.17   | DPLL-Satisfiable?                 | `dpll_satisfiable`            | [`logic.py`][logic]             | Done | Included |
 | 7.18   | WalkSAT                           | `WalkSAT`                     | [`logic.py`][logic]             | Done | Included |
 | 7.20   | Hybrid-Wumpus-Agent               | `HybridWumpusAgent`           |                                 |      |          |
-| 7.22   | SATPlan                           | `SAT_plan`                    | [`logic.py`][logic]             | Done | Included          |
-| 9      | Subst                             | `subst`                       | [`logic.py`][logic]             | Done |          |
+| 7.22   | SATPlan                           | `SAT_plan`                    | [`logic.py`][logic]             | Done | Included |
+| 9      | Subst                             | `subst`                       | [`logic.py`][logic]             | Done | Included |
 | 9.1    | Unify                             | `unify`                       | [`logic.py`][logic]             | Done | Included |
 | 9.3    | FOL-FC-Ask                        | `fol_fc_ask`                  | [`logic.py`][logic]             | Done | Included |
 | 9.6    | FOL-BC-Ask                        | `fol_bc_ask`                  | [`logic.py`][logic]             | Done | Included |
-| 9.8    | Append                            |                               |                                 |      |          |
 | 10.1   | Air-Cargo-problem                 | `air_cargo`                   | [`planning.py`][planning]       | Done | Included |
 | 10.2   | Spare-Tire-Problem                | `spare_tire`                  | [`planning.py`][planning]       | Done | Included |
 | 10.3   | Three-Block-Tower                 | `three_block_tower`           | [`planning.py`][planning]       | Done | Included |
-| 10.7   | Cake-Problem                      | `have_cake_and_eat_cake_too`  | [`planning.py`][planning]       | Done |          |
-| 10.9   | Graphplan                         | `GraphPlan`                   | [`planning.py`][planning]       |      |          |
-| 10.13  | Partial-Order-Planner             |                               |                                 |      |          |
-| 11.1   | Job-Shop-Problem-With-Resources   | `job_shop_problem`            | [`planning.py`][planning]       | Done |          |
-| 11.5   | Hierarchical-Search               | `hierarchical_search`         | [`planning.py`][planning]       |      |          |
-| 11.8   | Angelic-Search                    |                               |                                 |      |          |
-| 11.10  | Doubles-tennis                    | `double_tennis_problem`       | [`planning.py`][planning]       |      |          |
+| 10.7   | Cake-Problem                      | `have_cake_and_eat_cake_too`  | [`planning.py`][planning]       | Done | Included |
+| 10.9   | Graphplan                         | `GraphPlan`                   | [`planning.py`][planning]       | Done | Included |
+| 10.13  | Partial-Order-Planner             | `PartialOrderPlanner`         | [`planning.py`][planning]       | Done | Included |
+| 11.1   | Job-Shop-Problem-With-Resources   | `job_shop_problem`            | [`planning.py`][planning]       | Done | Included |
+| 11.5   | Hierarchical-Search               | `hierarchical_search`         | [`planning.py`][planning]       | Done | Included |
+| 11.8   | Angelic-Search                    | `angelic_search`              | [`planning.py`][planning]       | Done | Included |
+| 11.10  | Doubles-tennis                    | `double_tennis_problem`       | [`planning.py`][planning]       | Done | Included |
 | 13     | Discrete Probability Distribution | `ProbDist`                    | [`probability.py`][probability] | Done | Included |
-| 13.1   | DT-Agent                          | `DTAgent`                     | [`probability.py`][probability] |      |          |
+| 13.1   | DT-Agent                          | `DTAgent`                     | [`probability.py`][probability] | Done | Included |
 | 14.9   | Enumeration-Ask                   | `enumeration_ask`             | [`probability.py`][probability] | Done | Included |
 | 14.11  | Elimination-Ask                   | `elimination_ask`             | [`probability.py`][probability] | Done | Included |
-| 14.13  | Prior-Sample                      | `prior_sample`                | [`probability.py`][probability] |      | Included |
+| 14.13  | Prior-Sample                      | `prior_sample`                | [`probability.py`][probability] | Done | Included |
 | 14.14  | Rejection-Sampling                | `rejection_sampling`          | [`probability.py`][probability] | Done | Included |
 | 14.15  | Likelihood-Weighting              | `likelihood_weighting`        | [`probability.py`][probability] | Done | Included |
 | 14.16  | Gibbs-Ask                         | `gibbs_ask`                   | [`probability.py`][probability] | Done | Included |
-| 15.4   | Forward-Backward                  | `forward_backward`            | [`probability.py`][probability] | Done |          |
-| 15.6   | Fixed-Lag-Smoothing               | `fixed_lag_smoothing`         | [`probability.py`][probability] | Done |          |
-| 15.17  | Particle-Filtering                | `particle_filtering`          | [`probability.py`][probability] | Done |          |
-| 16.9   | Information-Gathering-Agent       |                               |                                 |      |          |
+| 15.4   | Forward-Backward                  | `forward_backward`            | [`probability.py`][probability] | Done | Included |
+| 15.6   | Fixed-Lag-Smoothing               | `fixed_lag_smoothing`         | [`probability.py`][probability] | Done | Included |
+| 15.17  | Particle-Filtering                | `particle_filtering`          | [`probability.py`][probability] | Done | Included |
+| 16.9   | Information-Gathering-Agent       | `InformationGatheringAgent`   | [`probability.py`][probability] | Done | Included |
 | 17.4   | Value-Iteration                   | `value_iteration`             | [`mdp.py`][mdp]                 | Done | Included |
 | 17.7   | Policy-Iteration                  | `policy_iteration`            | [`mdp.py`][mdp]                 | Done | Included |
-| 17.9   | POMDP-Value-Iteration             |                               |                                 |      |          |
+| 17.9   | POMDP-Value-Iteration             | `pomdp_value_iteration`       | [`mdp.py`][mdp]                 | Done | Included |
 | 18.5   | Decision-Tree-Learning            | `DecisionTreeLearner`         | [`learning.py`][learning]       | Done | Included |
-| 18.8   | Cross-Validation                  | `cross_validation`            | [`learning.py`][learning]       |      |          |
+| 18.8   | Cross-Validation                  | `cross_validation`            | [`learning.py`][learning]\*     |      |          |
 | 18.11  | Decision-List-Learning            | `DecisionListLearner`         | [`learning.py`][learning]\*     |      |          |
 | 18.24  | Back-Prop-Learning                | `BackPropagationLearner`      | [`learning.py`][learning]       | Done | Included |
 | 18.34  | AdaBoost                          | `AdaBoost`                    | [`learning.py`][learning]       | Done | Included |
 | 19.2   | Current-Best-Learning             | `current_best_learning`       | [`knowledge.py`](knowledge.py)  | Done | Included |
 | 19.3   | Version-Space-Learning            | `version_space_learning`      | [`knowledge.py`](knowledge.py)  | Done | Included |
 | 19.8   | Minimal-Consistent-Det            | `minimal_consistent_det`      | [`knowledge.py`](knowledge.py)  | Done | Included |
-| 19.12  | FOIL                              | `FOIL_container`              | [`knowledge.py`](knowledge.py)  | Done |          |
+| 19.12  | FOIL                              | `FOIL_container`              | [`knowledge.py`](knowledge.py)  | Done | Included |
 | 21.2   | Passive-ADP-Agent                 | `PassiveADPAgent`             | [`rl.py`][rl]                   | Done | Included |
 | 21.4   | Passive-TD-Agent                  | `PassiveTDAgent`              | [`rl.py`][rl]                   | Done | Included |
 | 21.8   | Q-Learning-Agent                  | `QLearningAgent`              | [`rl.py`][rl]                   | Done | Included |
 | 22.1   | HITS                              | `HITS`                        | [`nlp.py`][nlp]                 | Done | Included |
 | 23     | Chart-Parse                       | `Chart`                       | [`nlp.py`][nlp]                 | Done | Included |
 | 23.5   | CYK-Parse                         | `CYK_parse`                   | [`nlp.py`][nlp]                 | Done | Included |
-| 25.9   | Monte-Carlo-Localization          | `monte_carlo_localization`    | [`probability.py`][probability] | Done |          |
+| 25.9   | Monte-Carlo-Localization          | `monte_carlo_localization`    | [`probability.py`][probability] | Done | Included |
 
 
 # Index of data structures
@@ -169,7 +168,7 @@ Here is a table of the implemented data structures, the figure, name of the impl
 
 # Acknowledgements
 
-Many thanks for contributions over the years. I got bug reports, corrected code, and other support from Darius Bacon, Phil Ruggera, Peng Shao, Amit Patil, Ted Nienstedt, Jim Martin, Ben Catanzariti, and others. Now that the project is on GitHub, you can see the [contributors](https://github.com/aimacode/aima-python/graphs/contributors) who are doing a great job of actively improving the project. Many thanks to all contributors, especially @darius, @SnShine, @reachtarunhere, @MrDupin, and @Chipe1.
+Many thanks for contributions over the years. I got bug reports, corrected code, and other support from Darius Bacon, Phil Ruggera, Peng Shao, Amit Patil, Ted Nienstedt, Jim Martin, Ben Catanzariti, and others. Now that the project is on GitHub, you can see the [contributors](https://github.com/aimacode/aima-python/graphs/contributors) who are doing a great job of actively improving the project. Many thanks to all contributors, especially @darius, @SnShine, @reachtarunhere, @MrDupin, @Chipe1, @ad71 and @MariannaSpyrakou.
 
 <!---Reference Links-->
 [agents]:../master/agents.py

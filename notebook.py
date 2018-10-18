@@ -888,6 +888,7 @@ class Canvas_fol_bc_ask(Canvas):
         self.text_n(self.table[self.context[0]][self.context[1]] if self.context else "Click for text", 0.025, 0.975)
         self.update()
 
+
 ############################################################################################################
 
 #####################           Functions to assist plotting in search.ipynb            ####################
@@ -991,8 +992,13 @@ def display_visual(graph_data, user_input, algorithm=None, problem=None):
                                                        "Depth First Tree Search", 
                                                        "Breadth First Search", 
                                                        "Depth First Graph Search", 
+                                                       "Best First Graph Search",
                                                        "Uniform Cost Search", 
-                                                       "A-star Search"})
+                                                       "Depth Limited Search",
+                                                       "Iterative Deepening Search",
+                                                       "Greedy Best First Search",
+                                                       "A-star Search",
+                                                       "Recursive Best First Search"})
 
             algo_dropdown = widgets.Dropdown(description="Search algorithm: ",
                                              options=sorted(list(algorithm.keys())),
@@ -1086,3 +1092,24 @@ def gaussian_kernel(l=5, sig=1.0):
     xx, yy = np.meshgrid(ax, ax)
     kernel = np.exp(-(xx**2 + yy**2) / (2. * sig**2))
     return kernel
+
+# Plots utility function for a POMDP
+def plot_pomdp_utility(utility):
+    save = utility['0'][0]
+    delete = utility['1'][0]
+    ask_save = utility['2'][0]
+    ask_delete = utility['2'][-1]
+    left = (save[0] - ask_save[0]) / (save[0] - ask_save[0] + ask_save[1] - save[1])
+    right = (delete[0] - ask_delete[0]) / (delete[0] - ask_delete[0] + ask_delete[1] - delete[1])
+
+    colors = ['g', 'b', 'k']
+    for action in utility:
+        for value in utility[action]:
+            plt.plot(value, color=colors[int(action)])
+    plt.vlines([left, right], -20, 10, linestyles='dashed', colors='c')
+    plt.ylim(-20, 13)
+    plt.xlim(0, 1)
+    plt.text(left/2 - 0.05, 10, 'Save')
+    plt.text((right + left)/2 - 0.02, 10, 'Ask')
+    plt.text((right + 1)/2 - 0.07, 10, 'Delete')
+    plt.show()

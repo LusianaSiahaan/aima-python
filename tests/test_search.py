@@ -3,11 +3,12 @@ from search import *
 
 
 romania_problem = GraphProblem('Arad', 'Bucharest', romania_map)
-vacumm_world = GraphProblemStochastic('State_1', ['State_7', 'State_8'], vacumm_world)
+vacuum_world = GraphProblemStochastic('State_1', ['State_7', 'State_8'], vacuum_world)
 LRTA_problem = OnlineSearchProblem('State_3', 'State_5', one_dim_state_space)
 eight_puzzle = EightPuzzle((1, 2, 3, 4, 5, 7, 8, 6, 0))
 eight_puzzle2 = EightPuzzle((1, 0, 6, 8, 7, 5, 4, 2), (0, 1, 2, 3, 4, 5, 6, 7, 8))
 nqueens = NQueensProblem(8)
+
 
 def test_find_min_edge():
     assert romania_problem.find_min_edge() == 70
@@ -16,11 +17,11 @@ def test_find_min_edge():
 def test_breadth_first_tree_search():
     assert breadth_first_tree_search(
         romania_problem).solution() == ['Sibiu', 'Fagaras', 'Bucharest']
-    assert breadth_first_search(nqueens).solution() == [0, 4, 7, 5, 2, 6, 1, 3]
+    assert breadth_first_graph_search(nqueens).solution() == [0, 4, 7, 5, 2, 6, 1, 3]
 
 
-def test_breadth_first_search():
-    assert breadth_first_search(romania_problem).solution() == ['Sibiu', 'Fagaras', 'Bucharest']
+def test_breadth_first_graph_search():
+    assert breadth_first_graph_search(romania_problem).solution() == ['Sibiu', 'Fagaras', 'Bucharest']
 
 
 def test_best_first_graph_search():
@@ -151,7 +152,33 @@ def test_conflict():
 def test_recursive_best_first_search():
     assert recursive_best_first_search(
         romania_problem).solution() == ['Sibiu', 'Rimnicu', 'Pitesti', 'Bucharest']
+    assert recursive_best_first_search(
+        EightPuzzle((2, 4, 3, 1, 5, 6, 7, 8, 0))).solution() == [
+            'UP', 'LEFT', 'UP', 'LEFT', 'DOWN', 'RIGHT', 'RIGHT', 'DOWN'
+        ]
 
+    def manhattan(node):
+        state = node.state
+        index_goal = {0:[2,2], 1:[0,0], 2:[0,1], 3:[0,2], 4:[1,0], 5:[1,1], 6:[1,2], 7:[2,0], 8:[2,1]}
+        index_state = {}
+        index = [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]]
+        x, y = 0, 0
+        
+        for i in range(len(state)):
+            index_state[state[i]] = index[i]
+        
+        mhd = 0
+        
+        for i in range(8):
+            for j in range(2):
+                mhd = abs(index_goal[i][j] - index_state[i][j]) + mhd
+        
+        return mhd
+
+    assert recursive_best_first_search(
+        EightPuzzle((2, 4, 3, 1, 5, 6, 7, 8, 0)), h=manhattan).solution() == [
+            'LEFT', 'UP', 'UP', 'LEFT', 'DOWN', 'RIGHT', 'DOWN', 'UP', 'DOWN', 'RIGHT'
+        ]
 
 def test_hill_climbing():
     prob = PeakFindingProblem((0, 0), [[0, 5, 10, 20],
@@ -200,23 +227,31 @@ def test_and_or_graph_search():
             return False
         predicate = lambda x: run_plan(x, problem, plan[1][x])
         return all(predicate(r) for r in problem.result(state, plan[0]))
-    plan = and_or_graph_search(vacumm_world)
-    assert run_plan('State_1', vacumm_world, plan)
+    plan = and_or_graph_search(vacuum_world)
+    assert run_plan('State_1', vacuum_world, plan)
+
+
+def test_online_dfs_agent():
+    odfs_agent = OnlineDFSAgent(LRTA_problem)
+    keys = [key for key in odfs_agent('State_3')]
+    assert keys[0] in ['Right', 'Left']
+    assert keys[1] in ['Right', 'Left']
+    assert odfs_agent('State_5') is None
 
 
 def test_LRTAStarAgent():
-    my_agent = LRTAStarAgent(LRTA_problem)
-    assert my_agent('State_3') == 'Right'
-    assert my_agent('State_4') == 'Left'
-    assert my_agent('State_3') == 'Right'
-    assert my_agent('State_4') == 'Right'
-    assert my_agent('State_5') is None
+    lrta_agent = LRTAStarAgent(LRTA_problem)
+    assert lrta_agent('State_3') == 'Right'
+    assert lrta_agent('State_4') == 'Left'
+    assert lrta_agent('State_3') == 'Right'
+    assert lrta_agent('State_4') == 'Right'
+    assert lrta_agent('State_5') is None
 
-    my_agent = LRTAStarAgent(LRTA_problem)
-    assert my_agent('State_4') == 'Left'
+    lrta_agent = LRTAStarAgent(LRTA_problem)
+    assert lrta_agent('State_4') == 'Left'
 
-    my_agent = LRTAStarAgent(LRTA_problem)
-    assert my_agent('State_5') is None
+    lrta_agent = LRTAStarAgent(LRTA_problem)
+    assert lrta_agent('State_5') is None
 
 
 def test_genetic_algorithm():
@@ -333,7 +368,7 @@ def test_simpleProblemSolvingAgent():
 >>> compare_graph_searchers()
     Searcher                      romania_map(A, B)        romania_map(O, N)         australia_map
     breadth_first_tree_search     <  21/  22/  59/B>   <1158/1159/3288/N>    <   7/   8/  22/WA>
-    breadth_first_search          <   7/  11/  18/B>   <  19/  20/  45/N>    <   2/   6/   8/WA>
+    breadth_first_graph_search          <   7/  11/  18/B>   <  19/  20/  45/N>    <   2/   6/   8/WA>
     depth_first_graph_search      <   8/   9/  20/B>   <  16/  17/  38/N>    <   4/   5/  11/WA>
     iterative_deepening_search    <  11/  33/  31/B>   < 656/1815/1812/N>    <   3/  11/  11/WA>
     depth_limited_search          <  54/  65/ 185/B>   < 387/1012/1125/N>    <  50/  54/ 200/WA>

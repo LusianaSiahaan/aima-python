@@ -8,6 +8,7 @@ from utils import argmax, vector_add
 
 infinity = float('inf')
 GameState = namedtuple('GameState', 'to_move, utility, board, moves')
+StochasticGameState = namedtuple('StochasticGameState', 'to_move, utility, board, moves, chance')
 
 # ______________________________________________________________________________
 # Minimax Search
@@ -41,23 +42,22 @@ def minimax_decision(state, game):
 
 # ______________________________________________________________________________
 
+
 def expectiminimax(state, game):
     """Return the best move for a player after dice are thrown. The game tree
 	includes chance nodes along with min and max nodes. [Figure 5.11]"""
     player = game.to_move(state)
 
-    def max_value(state, dice_roll):
+    def max_value(state):
         v = -infinity
         for a in game.actions(state):
             v = max(v, chance_node(state, a))
-            game.dice_roll = dice_roll
         return v
 
-    def min_value(state, dice_roll):
+    def min_value(state):
         v = infinity
         for a in game.actions(state):
             v = min(v, chance_node(state, a))
-            game.dice_roll = dice_roll
         return v
 
     def chance_node(state, action):
@@ -65,22 +65,20 @@ def expectiminimax(state, game):
         if game.terminal_test(res_state):
             return game.utility(res_state, player)
         sum_chances = 0
-        num_chances = 21
-        dice_rolls = list(itertools.combinations_with_replacement([1, 2, 3, 4, 5, 6], 2))
-        if res_state.to_move == 'W':
-            for val in dice_rolls:
-                game.dice_roll = (-val[0], -val[1])
-                sum_chances += max_value(res_state,
-                                         (-val[0], -val[1])) * (1/36 if val[0] == val[1] else 1/18)
-        elif res_state.to_move == 'B':
-            for val in dice_rolls:
-                game.dice_roll = val
-                sum_chances += min_value(res_state, val) * (1/36 if val[0] == val[1] else 1/18)
+        num_chances = len(game.chances(res_state))
+        for chance in game.chances(res_state):
+            res_state = game.outcome(res_state, chance)
+            util = 0
+            if res_state.to_move == player:
+                util = max_value(res_state)
+            else:
+                util = min_value(res_state)
+            sum_chances += util * game.probability(chance)
         return sum_chances / num_chances
 
     # Body of expectiminimax:
     return argmax(game.actions(state),
-                  key=lambda a: chance_node(state, a))
+                  key=lambda a: chance_node(state, a), default=None)
 
 
 def alphabeta_search(state, game):
@@ -112,7 +110,7 @@ def alphabeta_search(state, game):
             beta = min(beta, v)
         return v
 
-    # Body of alphabeta_cutoff_search:
+    # Body of alphabeta_search:
     best_score = -infinity
     beta = infinity
     best_action = None
@@ -181,18 +179,21 @@ def query_player(game, state):
     game.display(state)
     print("available moves: {}".format(game.actions(state)))
     print("")
-    move_string = input('Your move? ')
-    try:
-        move = eval(move_string)
-    except NameError:
-        move = move_string
+    move = None
+    if game.actions(state):
+        move_string = input('Your move? ')
+        try:
+            move = eval(move_string)
+        except NameError:
+            move = move_string
+    else:
+        print('no legal moves: passing turn to next player')
     return move
 
 
 def random_player(game, state):
     """A player that chooses a legal move at random."""
-    return random.choice(game.actions(state))
-
+    return random.choice(game.actions(state)) if game.actions(state) else None
 
 def alphabeta_player(game, state):
     return alphabeta_search(state, game)
@@ -252,6 +253,36 @@ class Game:
                     self.display(state)
                     return self.utility(state, self.to_move(self.initial))
 
+class StochasticGame(Game):
+    """A stochastic game includes uncertain events which influence
+    the moves of players at each state. To create a stochastic game, subclass
+    this class and implement chances and outcome along with the other
+    unimplemented game class methods."""
+
+    def chances(self, state):
+        """Return a list of all possible uncertain events at a state."""
+        raise NotImplementedError
+
+    def outcome(self, state, chance):
+        """Return the state which is the outcome of a chance trial."""
+        raise NotImplementedError
+
+    def probability(self, chance):
+        """Return the probability of occurence of a chance."""
+        raise NotImplementedError
+
+    def play_game(self, *players):
+        """Play an n-person, move-alternating stochastic game."""
+        state = self.initial
+        while True:
+            for player in players:
+                chance = random.choice(self.chances(state))
+                state = self.outcome(state, chance)
+                move = player(self, state)
+                state = self.result(state, move)
+                if self.terminal_test(state):
+                    self.display(state)
+                    return self.utility(state, self.to_move(self.initial))
 
 class Fig52Game(Game):
     """The game represented in [Figure 5.2]. Serves as a simple test case."""
@@ -389,30 +420,28 @@ class ConnectFour(TicTacToe):
                 if y == 1 or (x, y - 1) in state.board]
 
 
-class Backgammon(Game):
+class Backgammon(StochasticGame):
     """A two player game where the goal of each player is to move all the
 	checkers off the board. The moves for each state are determined by
 	rolling a pair of dice."""
 
     def __init__(self):
         """Initial state of the game"""
-        self.dice_roll = (-random.randint(1, 6), -random.randint(1, 6))
-        # TODO : Add bar to Board class where a blot is placed when it is hit.
-        point = {'W':0, 'B':0}
-        self.board = [point.copy() for index in range(24)]
-        self.board[0]['B'] = self.board[23]['W'] = 2
-        self.board[5]['W'] = self.board[18]['B'] = 5
-        self.board[7]['W'] = self.board[16]['B'] = 3
-        self.board[11]['B'] = self.board[12]['W'] = 5
-        self.allow_bear_off = {'W': False, 'B': False}
-
-        self.initial = GameState(to_move='W',
-                                 utility=0, 
-                                 board=self.board,
-                                 moves=self.get_all_moves(self.board, 'W'))
+        point = {'W' : 0, 'B' : 0}
+        board = [point.copy() for index in range(24)]
+        board[0]['B'] = board[23]['W'] = 2
+        board[5]['W'] = board[18]['B'] = 5
+        board[7]['W'] = board[16]['B'] = 3
+        board[11]['B'] = board[12]['W'] = 5
+        self.allow_bear_off = {'W' : False, 'B' : False}
+        self.direction = {'W' : -1, 'B' : 1}
+        self.initial = StochasticGameState(to_move='W',
+                                           utility=0,
+                                           board=board,
+                                           moves=self.get_all_moves(board, 'W'), chance=None)
 
     def actions(self, state):
-        """Returns a list of legal moves for a state."""
+        """Return a list of legal moves for a state."""
         player = state.to_move
         moves = state.moves
         if len(moves) == 1 and len(moves[0]) == 1:
@@ -420,22 +449,21 @@ class Backgammon(Game):
         legal_moves = []
         for move in moves:
             board = copy.deepcopy(state.board)
-            if self.is_legal_move(move, self.dice_roll, player):
+            if self.is_legal_move(board, move, state.chance, player):
                 legal_moves.append(move)
         return legal_moves
 
     def result(self, state, move):
         board = copy.deepcopy(state.board)
         player = state.to_move
-        self.move_checker(move[0], self.dice_roll[0], player)
+        self.move_checker(board, move[0], state.chance[0], player)
         if len(move) == 2:
-            self.move_checker(move[1], self.dice_roll[1], player)
+            self.move_checker(board, move[1], state.chance[1], player)
         to_move = ('W' if player == 'B' else 'B')
-        return GameState(to_move=to_move,
-                         utility=self.compute_utility(board, move, player),
-                         board=board,
-                         moves=self.get_all_moves(board, to_move))
-
+        return StochasticGameState(to_move=to_move,
+                                   utility=self.compute_utility(board, move, player),
+                                   board=board,
+                                   moves=self.get_all_moves(board, to_move), chance=None)
 
     def utility(self, state, player):
         """Return the value to player; 1 for win, -1 for loss, 0 otherwise."""
@@ -452,7 +480,7 @@ class Backgammon(Game):
         all_points = board
         taken_points = [index for index, point in enumerate(all_points)
                         if point[player] > 0]
-        if self.checkers_at_home(player) == 1:
+        if self.checkers_at_home(board, player) == 1:
             return [(taken_points[0], )]
         moves = list(itertools.permutations(taken_points, 2))
         moves = moves + [(index, index) for index, point in enumerate(all_points)
@@ -463,32 +491,28 @@ class Backgammon(Game):
         """Display state of the game."""
         board = state.board
         player = state.to_move
-        print("Current State : ")
+        print("current state : ")
         for index, point in enumerate(board):
-            if point['W'] != 0 or point['B'] != 0:
-                print("Point : ", index, "	W : ", point['W'], "    B : ", point['B'])
-        print("To play : ", player)
+            print("point : ", index, "	W : ", point['W'], "    B : ", point['B'])
+        print("to play : ", player)
 
     def compute_utility(self, board, move, player):
         """If 'W' wins with this move, return 1; if 'B' wins return -1; else return 0."""
-        count = 0
+        util = {'W' : 1, 'B' : -1}
         for idx in range(0, 24):
-            count = count + board[idx][player]
-        if player == 'W' and count == 0:
-            return 1
-        if player == 'B' and count == 0:
-            return -1
-        return 0
+            if board[idx][player] > 0:
+                return 0
+        return util[player]
 
-    def checkers_at_home(self, player):
+    def checkers_at_home(self, board, player):
         """Return the no. of checkers at home for a player."""
         sum_range = range(0, 7) if player == 'W' else range(17, 24)
         count = 0
         for idx in sum_range:
-            count = count + self.board[idx][player]
+            count = count + board[idx][player]
         return count
 
-    def is_legal_move(self, start, steps, player):
+    def is_legal_move(self, board, start, steps, player):
         """Move is a tuple which contains starting points of checkers to be
 		moved during a player's turn. An on-board move is legal if both the destinations
 		are open. A bear-off move is the one where a checker is moved off-board.
@@ -497,31 +521,31 @@ class Backgammon(Game):
         dest_range = range(0, 24)
         move1_legal = move2_legal = False
         if dest1 in dest_range:
-            if self.is_point_open(player, self.board[dest1]):
-                self.move_checker(start[0], steps[0], player)
+            if self.is_point_open(player, board[dest1]):
+                self.move_checker(board, start[0], steps[0], player)
                 move1_legal = True
         else:
             if self.allow_bear_off[player]:
-                self.move_checker(start[0], steps[0], player)
+                self.move_checker(board, start[0], steps[0], player)
                 move1_legal = True
         if not move1_legal:
             return False
         if dest2 in dest_range:
-            if self.is_point_open(player, self.board[dest2]):
+            if self.is_point_open(player, board[dest2]):
                 move2_legal = True
         else:
             if self.allow_bear_off[player]:
                 move2_legal = True
         return move1_legal and move2_legal
 
-    def move_checker(self, start, steps, player):
+    def move_checker(self, board, start, steps, player):
         """Move a checker from starting point by a given number of steps"""
         dest = start + steps
         dest_range = range(0, 24)
-        self.board[start][player] -= 1
+        board[start][player] -= 1
         if dest in dest_range:
-            self.board[dest][player] += 1
-            if self.checkers_at_home(player) == 15:
+            board[dest][player] += 1
+            if self.checkers_at_home(board, player) == 15:
                 self.allow_bear_off[player] = True
 
     def is_point_open(self, player, point):
@@ -530,3 +554,20 @@ class Backgammon(Game):
         move a checker to a point only if it is open."""
         opponent = 'B' if player == 'W' else 'W'
         return point[opponent] <= 1
+
+    def chances(self, state):
+        """Return a list of all possible dice rolls at a state."""
+        dice_rolls = list(itertools.combinations_with_replacement([1, 2, 3, 4, 5, 6], 2))
+        return dice_rolls
+
+    def outcome(self, state, chance):
+        """Return the state which is the outcome of a dice roll."""
+        dice = tuple(map((self.direction[state.to_move]).__mul__, chance))
+        return StochasticGameState(to_move=state.to_move,
+                                   utility=state.utility,
+                                   board=state.board,
+                                   moves=state.moves, chance=dice)
+
+    def probability(self, chance):
+        """Return the probability of occurence of a dice roll."""
+        return 1/36 if chance[0] == chance[1] else 1/18

@@ -6,11 +6,11 @@ functions."""
 
 from utils import (
     is_in, argmin, argmax, argmax_random_tie, probability, weighted_sampler,
-    memoize, print_table, open_data, Stack, FIFOQueue, PriorityQueue, name,
+    memoize, print_table, open_data, PriorityQueue, name,
     distance, vector_add
 )
 
-from collections import defaultdict
+from collections import defaultdict, deque
 import math
 import random
 import sys
@@ -109,11 +109,12 @@ class Node:
 
     def child_node(self, problem, action):
         """[Figure 3.10]"""
-        next_node = problem.result(self.state, action)
-        return Node(next_node, self, action,
+        next_state = problem.result(self.state, action)
+        next_node = Node(next_state, self, action,
                     problem.path_cost(self.path_cost, self.state,
-                                      action, next_node))
-
+                                      action, next_state))
+        return next_node
+    
     def solution(self):
         """Return the sequence of actions to go from the root to this node."""
         return [node.action for node in self.path()[1:]]
@@ -126,7 +127,7 @@ class Node:
             node = node.parent
         return list(reversed(path_back))
 
-    # We want for a queue of nodes in breadth_first_search or
+    # We want for a queue of nodes in breadth_first_graph_search or
     # astar_search to have no duplicated states, so we treat nodes
     # with the same state as equal. [Problem: this may not be what you
     # want in other contexts.]
@@ -179,11 +180,30 @@ class SimpleProblemSolvingAgentProgram:
 # Uninformed Search algorithms
 
 
-def tree_search(problem, frontier):
-    """Search through the successors of a problem to find a goal.
-    The argument frontier should be an empty queue.
-    Repeats infinites in case of loops. [Figure 3.7]"""
-    frontier.append(Node(problem.initial))
+def breadth_first_tree_search(problem):
+    """Search the shallowest nodes in the search tree first.
+        Search through the successors of a problem to find a goal.
+        The argument frontier should be an empty queue.
+        Repeats infinitely in case of loops. [Figure 3.7]"""
+
+    frontier = deque([Node(problem.initial)])  # FIFO queue
+
+    while frontier:
+        node = frontier.popleft()
+        if problem.goal_test(node.state):
+            return node
+        frontier.extend(node.expand(problem))
+    return None
+
+
+def depth_first_tree_search(problem):
+    """Search the deepest nodes in the search tree first.
+        Search through the successors of a problem to find a goal.
+        The argument frontier should be an empty queue.
+        Repeats infinitely in case of loops. [Figure 3.7]"""
+
+    frontier = [Node(problem.initial)]  # Stack
+
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
@@ -192,12 +212,13 @@ def tree_search(problem, frontier):
     return None
 
 
-def graph_search(problem, frontier):
-    """Search through the successors of a problem to find a goal.
-    The argument frontier should be an empty queue.
-    Does not get trapped by loops.
-    If two paths reach a state, only use the first one. [Figure 3.7]"""
-    frontier.append(Node(problem.initial))
+def depth_first_graph_search(problem):
+    """Search the deepest nodes in the search tree first.
+        Search through the successors of a problem to find a goal.
+        The argument frontier should be an empty queue.
+        Does not get trapped by loops.
+        If two paths reach a state, only use the first one. [Figure 3.7]"""
+    frontier = [(Node(problem.initial))]  # Stack
     explored = set()
     while frontier:
         node = frontier.pop()
@@ -210,35 +231,19 @@ def graph_search(problem, frontier):
     return None
 
 
-def breadth_first_tree_search(problem):
-    """Search the shallowest nodes in the search tree first."""
-    return tree_search(problem, FIFOQueue())
-
-
-def depth_first_tree_search(problem):
-    """Search the deepest nodes in the search tree first."""
-    return tree_search(problem, Stack())
-
-
-def depth_first_graph_search(problem):
-    """Search the deepest nodes in the search tree first."""
-    return graph_search(problem, Stack())
-
-
-def breadth_first_search(problem):
+def breadth_first_graph_search(problem):
     """[Figure 3.11]
-	Note that this function can be implemented in a 
-	single line as below:
-	return graph_search(problem, FIFOQueue())
+    Note that this function can be implemented in a
+    single line as below:
+    return graph_search(problem, FIFOQueue())
     """
     node = Node(problem.initial)
     if problem.goal_test(node.state):
         return node
-    frontier = FIFOQueue()
-    frontier.append(node)
+    frontier = deque([node])
     explored = set()
     while frontier:
-        node = frontier.pop()
+        node = frontier.popleft()
         explored.add(node.state)
         for child in node.expand(problem):
             if child.state not in explored and child not in frontier:
@@ -258,9 +263,7 @@ def best_first_graph_search(problem, f):
     a best first search you can examine the f values of the path returned."""
     f = memoize(f, 'f')
     node = Node(problem.initial)
-    if problem.goal_test(node.state):
-        return node
-    frontier = PriorityQueue(min, f)
+    frontier = PriorityQueue('min', f)
     frontier.append(node)
     explored = set()
     while frontier:
@@ -470,16 +473,120 @@ class EightPuzzle(Problem):
         inversion = 0
         for i in range(len(state)):
             for j in range(i, len(state)):
-                if (state[i] > state[j] and state[j] != 0):
+                if state[i] > state[j] != 0:
                     inversion += 1
         
-        return (inversion % 2 == 0)
+        return inversion % 2 == 0
     
     def h(self, node):
         """ Return the heuristic value for a given state. Default heuristic function used is 
         h(n) = number of misplaced tiles """
 
         return sum(s != g for (s, g) in zip(node.state, self.goal))
+
+# ______________________________________________________________________________
+
+
+class PlanRoute(Problem):
+    """ The problem of moving the Hybrid Wumpus Agent from one place to other """
+
+    def __init__(self, initial, goal, allowed, dimrow):
+        """ Define goal state and initialize a problem """
+
+        self.dimrow = dimrow
+        self.goal = goal
+        self.allowed = allowed
+        Problem.__init__(self, initial, goal)
+
+    def actions(self, state):
+        """ Return the actions that can be executed in the given state.
+        The result would be a list, since there are only three possible actions
+        in any given state of the environment """
+
+        possible_actions = ['Forward', 'TurnLeft', 'TurnRight']
+        x, y = state.get_location()
+        orientation = state.get_orientation()
+
+        # Prevent Bumps
+        if x == 1 and orientation == 'LEFT':
+            if 'Forward' in possible_actions:
+                possible_actions.remove('Forward')
+        if y == 1 and orientation == 'DOWN':
+            if 'Forward' in possible_actions:
+                possible_actions.remove('Forward')
+        if x == self.dimrow and orientation == 'RIGHT':
+            if 'Forward' in possible_actions:
+                possible_actions.remove('Forward')
+        if y == self.dimrow and orientation == 'UP':
+            if 'Forward' in possible_actions:
+                possible_actions.remove('Forward')
+
+        return possible_actions
+
+    def result(self, state, action):
+        """ Given state and action, return a new state that is the result of the action.
+        Action is assumed to be a valid action in the state """
+        x, y = state.get_location()
+        proposed_loc = list()
+
+        # Move Forward
+        if action == 'Forward':
+            if state.get_orientation() == 'UP':
+                proposed_loc = [x, y + 1]
+            elif state.get_orientation() == 'DOWN':
+                proposed_loc = [x, y - 1]
+            elif state.get_orientation() == 'LEFT':
+                proposed_loc = [x - 1, y]
+            elif state.get_orientation() == 'RIGHT':
+                proposed_loc = [x + 1, y]
+            else:
+                raise Exception('InvalidOrientation')
+
+        # Rotate counter-clockwise
+        elif action == 'TurnLeft':
+            if state.get_orientation() == 'UP':
+                state.set_orientation('LEFT')
+            elif state.get_orientation() == 'DOWN':
+                state.set_orientation('RIGHT')
+            elif state.get_orientation() == 'LEFT':
+                state.set_orientation('DOWN')
+            elif state.get_orientation() == 'RIGHT':
+                state.set_orientation('UP')
+            else:
+                raise Exception('InvalidOrientation')
+
+        # Rotate clockwise
+        elif action == 'TurnRight':
+            if state.get_orientation() == 'UP':
+                state.set_orientation('RIGHT')
+            elif state.get_orientation() == 'DOWN':
+                state.set_orientation('LEFT')
+            elif state.get_orientation() == 'LEFT':
+                state.set_orientation('UP')
+            elif state.get_orientation() == 'RIGHT':
+                state.set_orientation('DOWN')
+            else:
+                raise Exception('InvalidOrientation')
+
+        if proposed_loc in self.allowed:
+            state.set_location(proposed_loc[0], [proposed_loc[1]])
+
+        return state
+
+    def goal_test(self, state):
+        """ Given a state, return True if state is a goal state or False, otherwise """
+
+        return state.get_location() == tuple(self.goal)
+
+    def h(self, node):
+        """ Return the heuristic value for a given state."""
+
+        # Manhattan Heuristic Function
+        x1, y1 = node.state.get_location()
+        x2, y2 = self.goal
+
+        return abs(x2 - x1) + abs(y2 - y1)
+
 
 # ______________________________________________________________________________
 # Other search algorithms
@@ -658,8 +765,8 @@ class OnlineDFSAgent:
         self.problem = problem
         self.s = None
         self.a = None
-        self.untried = defaultdict(list)
-        self.unbacktracked = defaultdict(list)
+        self.untried = dict()
+        self.unbacktracked = dict()
         self.result = {}
 
     def __call__(self, percept):
@@ -678,13 +785,13 @@ class OnlineDFSAgent:
                     self.a = None
                 else:
                     # else a <- an action b such that result[s', b] = POP(unbacktracked[s'])
-                    unbacktracked_pop = self.unbacktracked[s1].pop(0)
+                    unbacktracked_pop = self.unbacktracked.pop(s1)
                     for (s, b) in self.result.keys():
                         if self.result[(s, b)] == unbacktracked_pop:
                             self.a = b
                             break
             else:
-                self.a = self.untried[s1].pop(0)
+                self.a = self.untried.pop(s1)
         self.s = s1
         return self.a
 
@@ -853,15 +960,13 @@ def recombine(x, y):
 
 def recombine_uniform(x, y):
     n = len(x)
-    result = [0] * n;
+    result = [0] * n
     indexes = random.sample(range(n), n)
     for i in range(n):
         ix = indexes[i]
         result[ix] = x[ix] if i < n / 2 else y[ix]
-    try:
-        return ''.join(result)
-    except:
-        return result
+
+    return ''.join(str(r) for r in result)
         
 
 def mutate(x, gene_pool, pmut):
@@ -1013,7 +1118,7 @@ Each state is represented as
 7 - CCL     Clean                         Clean                       Left
 8 - CCR     Clean                         Clean                       Right
 """
-vacumm_world = Graph(dict(
+vacuum_world = Graph(dict(
     State_1=dict(Suck=['State_7', 'State_5'], Right=['State_2']),
     State_2=dict(Suck=['State_8', 'State_4'], Left=['State_2']),
     State_3=dict(Suck=['State_7'], Right=['State_4']),
@@ -1433,7 +1538,7 @@ class InstrumentedProblem(Problem):
 
 def compare_searchers(problems, header,
                       searchers=[breadth_first_tree_search,
-                                 breadth_first_search,
+                                 breadth_first_graph_search,
                                  depth_first_graph_search,
                                  iterative_deepening_search,
                                  depth_limited_search,
