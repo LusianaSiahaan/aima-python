@@ -97,11 +97,13 @@ class DataSet:
         # Initialize .examples from string or list or data directory
         if isinstance(examples, str):
             self.examples = parse_csv(examples)
+        elif examples is None:
+            self.examples = parse_csv(open_data(name + '.csv').read())
         else:
-            self.examples = examples or parse_csv(open_data(name + '.csv').read())
+            self.examples = examples
 
-        # Attrs are the indices of examples, unless otherwise stated.
-        if self.examples and not attrs:
+        # Attrs are the indices of examples, unless otherwise stated.   
+        if self.examples is not None and attrs is None:
             attrs = list(range(len(self.examples[0])))
 
         self.attrs = attrs
@@ -836,11 +838,7 @@ def network(input_units, hidden_layer_sizes, output_units, activation=sigmoid):
     hidden_layers_sizes : List number of neuron units in each hidden layer
     excluding input and output layers
     """
-    # Check for PerceptronLearner
-    if hidden_layer_sizes:
-        layers_sizes = [input_units] + hidden_layer_sizes + [output_units]
-    else:
-        layers_sizes = [input_units] + [output_units]
+    layers_sizes = [input_units] + hidden_layer_sizes + [output_units]
 
     net = [[NNUnit(activation) for n in range(size)]
            for size in layers_sizes]
@@ -1076,8 +1074,8 @@ def cross_validation(learner, size, dataset, k=10, trials=1):
         fold_errV = 0
         n = len(dataset.examples)
         examples = dataset.examples
+        random.shuffle(dataset.examples)
         for fold in range(k):
-            random.shuffle(dataset.examples)
             train_data, val_data = train_test_split(dataset, fold * (n / k),
                                                     (fold + 1) * (n / k))
             dataset.examples = train_data

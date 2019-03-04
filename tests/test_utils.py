@@ -2,6 +2,14 @@ import pytest
 from utils import *
 import random
 
+def test_sequence():
+    assert sequence(1) == (1,)
+    assert sequence("helloworld") == "helloworld"
+    assert sequence({"hello":4, "world":5}) == ({"hello":4, "world":5},)
+    assert sequence([1, 2, 3]) == [1, 2, 3]
+    assert sequence((4, 5, 6)) == (4, 5, 6)
+    assert sequence([(1, 2),(2, 3),(4, 5)]) == [(1, 2), (2, 3),(4, 5)]
+    assert sequence(([1, 2],[3, 4],[5, 6])) == ([1, 2], [3, 4],[5, 6])
 
 def test_removeall_list():
     assert removeall(4, []) == []
@@ -25,6 +33,11 @@ def test_count():
     assert count([True, False, True, True, False]) == 3
     assert count([5 > 1, len("abc") == 3, 3+1 == 5]) == 2
 
+def test_multimap():
+    assert multimap([(1, 2),(1, 3),(1, 4),(2, 3),(2, 4),(4, 5)]) == \
+        {1: [2, 3, 4], 2: [3, 4], 4: [5]}
+    assert multimap([("a", 2), ("a", 3), ("a", 4), ("b", 3), ("b", 4), ("c", 5)]) == \
+        {'a': [2, 3, 4], 'b': [3, 4], 'c': [5]}
 
 def test_product():
     assert product([1, 2, 3, 4]) == 24
@@ -35,9 +48,14 @@ def test_first():
     assert first('word') == 'w'
     assert first('') is None
     assert first('', 'empty') == 'empty'
+    assert first([1, 2, 3, 4, 5]) == 1
+    assert first([]) == None
     assert first(range(10)) == 0
     assert first(x for x in range(10) if x > 3) == 4
     assert first(x for x in range(10) if x > 100) is None
+    assert first((1, 2, 3)) == 1
+    assert first([(1, 2),(1, 3),(1, 4)]) == (1, 2)
+    assert first({1:"one", 2:"two", 3:"three"}) == 1
 
 
 def test_is_in():
